@@ -1,0 +1,43 @@
+{
+  "name": "codex-our-free-model",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Free frontier models inside Codex — no login, no sign-up, no API key.",
+  "license": "MIT",
+  "bin": {
+    "cofm": "./bin/cli.mjs",
+    "codex-our-free-model": "./bin/cli.mjs"
+  },
+  "exports": {
+    ".": "./src/service.js",
+    "./gateway": "./src/codex-gateway.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "skills",
+    "mcp.json",
+    "plugin.json",
+    ".agents",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "setup": "node bin/cli.mjs setup",
+    "run": "node bin/cli.mjs run",
+    "doctor": "node bin/cli.mjs doctor",
+    "test": "node --test test/"
+  },
+  "keywords": [
+    "codex",
+    "codex-plugin",
+    "free-model",
+    "llm-provider",
+    "responses-api"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "our-free-model": {
+      "command": "node",
+      "args": ["./bin/mcp-server.mjs"],
+      "env": {},
+      "startup_timeout_sec": 20,
+      "tool_timeout_sec": 180
+    }
+  }
+}

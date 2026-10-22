@@ -1,0 +1,14 @@
+# Normalize everything to LF in the repository. This project is a mix of
+# Node ESM sources and shell-adjacent files; CRLF in either breaks parsing or
+# shebang handling on Unix, and nothing here is Windows-specific.
+* text=auto eol=lf
+
+# These are binary and must never be line-ending converted or diffed as text.
+*.wasm binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.zip binary
+
+# Keep the icon and any future vendored assets byte-exact.
+icon.svg -text

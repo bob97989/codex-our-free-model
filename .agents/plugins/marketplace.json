@@ -1,0 +1,17 @@
+{
+  "name": "codex-our-free-model",
+  "interface": {
+    "displayName": "Our Free Model"
+  },
+  "plugins": [
+    {
+      "name": "codex-our-free-model",
+      "source": "./",
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Other"
+    }
+  ]
+}
