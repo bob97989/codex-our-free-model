@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "codex-our-free-model",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Free frontier models inside Codex — no login, no sign-up, no API key. Adds a local Responses-API provider backed by the OpenCode Zen public free lane, and puts its models in Codex's own model picker.",
   "author": {
     "name": "Ebony Vinyl"

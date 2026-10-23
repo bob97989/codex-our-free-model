@@ -9,6 +9,12 @@ import { fileURLToPath } from 'node:url'
 const root = fileURLToPath(new URL('../', import.meta.url))
 const serverPath = path.join(root, 'bin', 'mcp-server.mjs')
 
+test('portable MCP config declares its schema', () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, 'mcp.json'), 'utf8'))
+  assert.equal(manifest.$schema, 'https://agent-plugins.org/schemas/1.0.0/mcp.schema.json')
+  assert.ok(manifest.mcpServers['our-free-model'])
+})
+
 function startServer(env) {
   const child = spawn(process.execPath, [serverPath], {
     cwd: root,
