@@ -340,6 +340,11 @@ async function listModels() {
   return Array.isArray(payload?.data) ? payload.data : []
 }
 
+async function codexCatalogModels() {
+  const payload = await callGateway('/models/catalog', { timeoutMs: 15_000 })
+  return Array.isArray(payload?.models) ? payload.models : []
+}
+
 async function askModel({ prompt, model, reasoning_effort: effort }) {
   if (typeof prompt !== 'string' || prompt.trim() === '') throw new Error('`prompt` must be a non-empty string')
   let selected = typeof model === 'string' ? model.trim() : ''
@@ -385,7 +390,8 @@ let gatewayLaunch = null
 export async function ensureGateway({ dataDir = resolveDataDir() } = {}) {
   const existing = readGatewaySettings(dataDir)
   if (existing !== null && await healthReachable(existing)) {
-    const configPath = writeProviderConfig({ baseUrl: existing.baseUrl, key: existing.key })
+    const models = await codexCatalogModels().catch(() => [])
+    const configPath = writeProviderConfig({ baseUrl: existing.baseUrl, key: existing.key, models })
     return {
       alreadyRunning: true,
       baseUrl: existing.baseUrl,
@@ -424,7 +430,8 @@ export async function ensureGateway({ dataDir = resolveDataDir() } = {}) {
       if (spawnError !== undefined) throw new Error(`could not start the gateway: ${spawnError.message}`)
       const settings = readGatewaySettings(dataDir)
       if (settings !== null && await healthReachable(settings)) {
-        const configPath = writeProviderConfig({ baseUrl: settings.baseUrl, key: settings.key })
+        const models = await codexCatalogModels().catch(() => [])
+        const configPath = writeProviderConfig({ baseUrl: settings.baseUrl, key: settings.key, models })
         return {
           alreadyRunning: false,
           baseUrl: settings.baseUrl,

@@ -32,6 +32,7 @@ export const MAX_CATALOG_BYTES = 512 * 1024
 
 /** The default model window when the lane declares nothing better. */
 const DEFAULT_CONTEXT_WINDOW = 272_000
+export const CODEX_BASE_INSTRUCTIONS = 'You are Codex, a coding agent. You and the user share the same workspace and collaborate to achieve the user\'s goals.'
 
 /**
  * Reason the catalog exists at all: Codex asks a custom provider for its
@@ -50,6 +51,7 @@ export function codexCatalogEntry(row, priority) {
     slug: row.id,
     display_name: row.displayName && row.displayName !== '' ? row.displayName : row.id,
     description: row.description ?? `Free model via Our Free Model (${row.id})`,
+    base_instructions: CODEX_BASE_INSTRUCTIONS,
     context_window: contextWindow,
     max_context_window: contextWindow,
     auto_compact_token_limit: null,

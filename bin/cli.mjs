@@ -28,6 +28,7 @@ import {
   stripManagedBlock,
   upsertManagedBlock,
   writeConfig,
+  writeProviderConfig,
 } from '../src/codex-config.js'
 
 export { renderManagedBlock, stripManagedBlock, upsertManagedBlock }
@@ -68,10 +69,9 @@ async function cmdSetup(argv) {
     if (noConfig) {
       process.stdout.write('\n--no-config given; config.toml was not touched.\n')
     } else {
-      const file = path.join(codexHome(), 'config.toml')
-      const next = upsertManagedBlock(readConfig(file), renderManagedBlock({ baseUrl: url, key }))
-      writeConfig(file, next)
+      const file = writeProviderConfig({ baseUrl: url, key, models })
       process.stdout.write(`\nWrote [model_providers.${PROVIDER_ID}] into ${file}\n`)
+      process.stdout.write('Selected Our Free Model and installed its local model catalog.\n')
     }
     process.stdout.write(
       `\nNext:\n` +

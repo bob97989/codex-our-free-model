@@ -33,7 +33,7 @@ codex plugin add codex-our-free-model@codex-our-free-model
 
 # 2. Start the gateway and wire Codex to it
 #    (the plugin is already on disk — run its CLI directly)
-node ~/.codex/plugins/cache/codex-our-free-model/codex-our-free-model/1.1.2/bin/cli.mjs setup
+node ~/.codex/plugins/cache/codex-our-free-model/codex-our-free-model/1.1.3/bin/cli.mjs setup
 
 # 3. Start a session on a free model
 codex -m mimo-v2.6-flash-free -c model_provider=our-free-model
@@ -72,6 +72,11 @@ Provider keys stay in the local `settings.json` file with mode 0600; the panel
 only exposes the last four characters. Accounts use this project's existing
 aggregate-provider lane. The DSH-only OAuth and cloud-credential sign-in
 channels are not part of this Codex port.
+
+CC Switch rewrites `model_provider`, `model_catalog_json`, and the selected
+model. Keep CC Switch disabled while using this plugin. Running `cofm setup`
+again or choosing **Start and configure gateway** in the sidebar will point
+Codex back at Our Free Model.
 
 To make it permanent, add two lines to `~/.codex/config.toml`:
 

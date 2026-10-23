@@ -33,7 +33,7 @@ codex plugin add codex-our-free-model@codex-our-free-model
 
 # 2. 启动网关并写入 Codex 配置
 #    （插件已装到本地，直接用插件里的 CLI）
-node ~/.codex/plugins/cache/codex-our-free-model/codex-our-free-model/1.1.2/bin/cli.mjs setup
+node ~/.codex/plugins/cache/codex-our-free-model/codex-our-free-model/1.1.3/bin/cli.mjs setup
 
 # 3. 用免费模型开一个会话
 codex -m mimo-v2.6-flash-free -c model_provider=our-free-model
@@ -66,6 +66,10 @@ node bin/cli.mjs setup
 账号密钥保存在本机 `settings.json`（0600），面板只显示末四位。这里管理的是项目
 已有的 aggregate provider 能力，也就是 API Key 账号；DSH 原版的 OAuth/云凭证
 登录渠道不在这个 Codex 移植版中。
+
+CC Switch 会改写 `model_provider`、`model_catalog_json` 和默认模型。使用本插件时
+请关闭 CC Switch；重新运行 `cofm setup` 或从侧栏点「启动并配置网关」会重新把
+Codex 切到 Our Free Model。
 
 想让它长期生效，在 `~/.codex/config.toml` 里加两行：
 
