@@ -27,18 +27,45 @@
 ## 快速开始
 
 ```bash
-# 1. 安装插件（把 owner/repo 换成实际仓库）
-codex plugin marketplace add Ebony-Vinyl/codex-our-free-model
+# 1. 安装插件
+codex plugin marketplace add bob97989/codex-our-free-model
 codex plugin add codex-our-free-model@codex-our-free-model
 
 # 2. 启动网关并写入 Codex 配置
-npx codex-our-free-model setup
+#    （插件已装到本地，直接用插件里的 CLI）
+node ~/.codex/plugins/cache/codex-our-free-model/codex-our-free-model/1.1.0/bin/cli.mjs setup
 
 # 3. 用免费模型开一个会话
 codex -m mimo-v2.6-flash-free -c model_provider=our-free-model
 ```
 
+> 没装到默认路径？先用 `codex plugin list --json` 看 `installedPath`，
+> 再把上面的路径换成它。
+
 `setup` 会：启动网关 → 实测网关可用 → 把 provider 块写进 `~/.codex/config.toml` → 打印可用模型。
+
+**或者克隆仓库直接用**（不装插件也能跑）：
+
+```bash
+git clone https://github.com/bob97989/codex-our-free-model
+cd codex-our-free-model
+node bin/cli.mjs setup
+```
+
+## 侧边栏配置面板
+
+插件安装后会在 Codex 左侧边栏提供 **Our Free Model** 入口。首次打开时如果网关
+还没运行，可以直接点「启动并配置网关」，无需再回终端执行 `setup`。
+
+面板包含三块主要功能：
+
+- **模型**：按免费池或账号查看模型，单独开关某个模型，也可以整组隐藏。
+- **账号**：添加第三方 API Key 提供商，填写 Base URL 和模型清单，测试连接并自动发现模型。
+- **设置**：控制推理总开关、地区限制模型、免费池和外部账号模型。
+
+账号密钥保存在本机 `settings.json`（0600），面板只显示末四位。这里管理的是项目
+已有的 aggregate provider 能力，也就是 API Key 账号；DSH 原版的 OAuth/云凭证
+登录渠道不在这个 Codex 移植版中。
 
 想让它长期生效，在 `~/.codex/config.toml` 里加两行：
 

@@ -19,10 +19,11 @@ import os from 'node:os'
 import path from 'node:path'
 import { createModelRuntime, createRuntimeStores } from './core/runtime.js'
 import { ensureGatewayKey, startCodexGateway } from './codex-gateway.js'
+import { createPanelController } from './panel-controller.js'
 import { DATA_DIR_NAME } from './store.js'
 
 export const PRODUCT = 'codex-our-free-model'
-export const VERSION = '1.0.0'
+export const VERSION = '1.1.0'
 
 /**
  * Where this service keeps its state.
@@ -94,9 +95,16 @@ export async function startService({
       logger,
       attributionUserAgent: `${PRODUCT}/${VERSION}`,
     })
+    const panel = createPanelController({
+      settings: stores.settings,
+      runtime,
+      version: VERSION,
+      logger,
+    })
 
     listener = await startCodexGateway({
       runtime,
+      panel,
       config: () => {
         const value = stores.settings.get()
         const forward = value.forward ?? {}
@@ -140,6 +148,7 @@ export async function startService({
       url: `http://${listener.host === '0.0.0.0' ? '127.0.0.1' : listener.host}:${listener.port}`,
       key,
       runtime,
+      panel,
       stores,
       async close() {
         if (stopped) return

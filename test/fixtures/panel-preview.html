@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Our Free Model panel preview</title>
+  <style>
+    html, body, iframe { width: 100%; height: 100%; margin: 0; border: 0; }
+    body { background: #f5f5f2; }
+  </style>
+</head>
+<body>
+  <iframe id="frame" title="Our Free Model"></iframe>
+  <script>
+    const frame = document.getElementById('frame')
+    const fakeModels = [
+      { id: 'deepseek-v4.1-flash-free', name: 'DeepSeek V4.1 Flash', channel: 'free', providerId: '', modelId: 'deepseek-v4.1-flash-free', enabled: true, hiddenByGroup: false, contextWindow: 1048576, vision: true, reasoning: true, route: 'main' },
+      { id: 'glm-5.3-flash-free', name: 'GLM 5.3 Flash Free', channel: 'free', providerId: '', modelId: 'glm-5.3-flash-free', enabled: true, hiddenByGroup: false, contextWindow: 1048576, vision: true, reasoning: true, route: 'main' },
+      { id: 'mimo-v2.6-flash-free', name: 'MiMo V2.6 Flash', channel: 'free', providerId: '', modelId: 'mimo-v2.6-flash-free', enabled: false, hiddenByGroup: false, contextWindow: 262144, vision: false, reasoning: true, route: 'main' },
+      { id: 'anthropic/claude-sonnet-4-20250514', name: 'Anthropic Claude Sonnet 4', channel: 'aggregate', providerId: 'anthropic', modelId: 'claude-sonnet-4-20250514', enabled: true, hiddenByGroup: false, contextWindow: 200000, vision: true, reasoning: true, route: 'main' },
+    ]
+    const snapshot = {
+      version: '1.1.0',
+      gateway: { configured: true, running: true, url: 'http://127.0.0.1:18421', port: 18421 },
+      settings: {
+        enabled: true,
+        exposeRegionModels: true,
+        hiddenModelIds: ['mimo-v2.6-flash-free'],
+        hideFreeModels: false,
+        aggregate: { enabled: true, providers: { anthropic: { enabled: true, hasKey: true, keyHint: '…3d9f', baseUrl: '', models: [], discovered: [], lastTest: { ok: true, at: Date.now(), status: 200, message: 'ok' } } } },
+        defaultMaxTokens: 32768,
+      },
+      models: fakeModels,
+      accounts: [{ providerId: 'anthropic', name: 'Anthropic', format: 'anthropic-messages', category: 'apikey', enabled: true, hasKey: true, keyHint: '…3d9f', baseUrl: '', models: [], discovered: [], contributedModels: 1, lastTest: { ok: true, status: 200 } }],
+      registry: [
+        { id: 'anthropic', name: 'Anthropic', category: 'apikey', authKind: 'apiKey', credentialUrl: 'https://platform.claude.com/settings/keys', baseUrl: 'https://api.anthropic.com/v1', baseUrlOverrideEnv: '', format: 'anthropic-messages', website: '', notes: 'Native Anthropic Messages passthrough.', local: false, modelCount: 3, models: [] },
+        { id: 'openai', name: 'OpenAI', category: 'apikey', authKind: 'apiKey', credentialUrl: 'https://platform.openai.com/api-keys', baseUrl: 'https://api.openai.com/v1', baseUrlOverrideEnv: '', format: 'openai-responses', website: '', notes: 'Native Responses API provider.', local: false, modelCount: 4, models: [] },
+      ],
+      counts: { models: 4, enabledModels: 3, freeModels: 3, aggregateModels: 1, accounts: 1 },
+    }
+    window.addEventListener('message', event => {
+      if (event.source !== frame.contentWindow || !event.data || event.data.jsonrpc !== '2.0') return
+      const message = event.data
+      if (message.method === 'ui/initialize') {
+        frame.contentWindow.postMessage({
+          jsonrpc: '2.0',
+          id: message.id,
+          result: {
+            protocolVersion: '2026-01-26',
+            hostInfo: { name: 'preview-host', version: '1' },
+            hostCapabilities: { serverTools: {} },
+            hostContext: { theme: 'light', platform: 'desktop', displayMode: 'fullscreen' },
+          },
+        }, '*')
+        return
+      }
+      if (message.method === 'ui/notifications/initialized') return
+      if (message.method === 'tools/call') {
+        frame.contentWindow.postMessage({
+          jsonrpc: '2.0',
+          id: message.id,
+          result: { content: [{ type: 'text', text: 'ok' }], structuredContent: snapshot },
+        }, '*')
+      }
+    })
+    frame.addEventListener('load', () => {
+      const view = new URLSearchParams(location.search).get('view')
+      if (view === 'accounts') {
+        setTimeout(() => frame.contentDocument?.querySelector('[data-tab="accounts"]')?.click(), 400)
+      }
+      if (view === 'add-account') {
+        setTimeout(() => {
+          frame.contentDocument?.querySelector('[data-tab="accounts"]')?.click()
+          setTimeout(() => frame.contentDocument?.querySelector('[data-action="add-account"]')?.click(), 250)
+        }, 400)
+      }
+    })
+    frame.src = '../../ui/panel.html'
+  </script>
+</body>
+</html>

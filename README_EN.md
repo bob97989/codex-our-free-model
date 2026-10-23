@@ -27,19 +27,51 @@ The free models come from [OpenCode's public Zen free pool](https://opencode.ai)
 ## Quick start
 
 ```bash
-# 1. Install the plugin (replace owner/repo with the real repository)
-codex plugin marketplace add Ebony-Vinyl/codex-our-free-model
+# 1. Install the plugin
+codex plugin marketplace add bob97989/codex-our-free-model
 codex plugin add codex-our-free-model@codex-our-free-model
 
 # 2. Start the gateway and wire Codex to it
-npx codex-our-free-model setup
+#    (the plugin is already on disk — run its CLI directly)
+node ~/.codex/plugins/cache/codex-our-free-model/codex-our-free-model/1.1.0/bin/cli.mjs setup
 
 # 3. Start a session on a free model
 codex -m mimo-v2.6-flash-free -c model_provider=our-free-model
 ```
 
+> Installed somewhere else? Run `codex plugin list --json` and use the
+> `installedPath` it reports in place of the path above.
+
 `setup` starts the gateway, verifies it answers, writes the provider block into
 `~/.codex/config.toml`, and prints the available models.
+
+**Or clone and run it directly** (works without installing the plugin):
+
+```bash
+git clone https://github.com/bob97989/codex-our-free-model
+cd codex-our-free-model
+node bin/cli.mjs setup
+```
+
+## Sidebar configuration
+
+After installation, the plugin adds an **Our Free Model** entry to Codex's left
+sidebar. If the gateway is not running yet, the panel can start it and write the
+managed provider block without returning to the terminal.
+
+The panel provides:
+
+- **Models** — inspect free-pool and account models, toggle individual models,
+  or hide a whole lane.
+- **Accounts** — add API-key providers, override the base URL, supply model ids,
+  test the connection, and discover the provider's live model listing.
+- **Settings** — control inference, region-limited models, the free pool, and
+  provider-account models.
+
+Provider keys stay in the local `settings.json` file with mode 0600; the panel
+only exposes the last four characters. Accounts use this project's existing
+aggregate-provider lane. The DSH-only OAuth and cloud-credential sign-in
+channels are not part of this Codex port.
 
 To make it permanent, add two lines to `~/.codex/config.toml`:
 

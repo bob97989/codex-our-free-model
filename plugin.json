@@ -1,13 +1,13 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "codex-our-free-model",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Free frontier models inside Codex — no login, no sign-up, no API key. Adds a local Responses-API provider backed by the OpenCode Zen public free lane, and puts its models in Codex's own model picker.",
   "author": {
     "name": "Ebony Vinyl"
   },
-  "homepage": "https://github.com/Ebony-Vinyl/codex-our-free-model",
-  "repository": "https://github.com/Ebony-Vinyl/codex-our-free-model",
+  "homepage": "https://github.com/bob97989/codex-our-free-model",
+  "repository": "https://github.com/bob97989/codex-our-free-model",
   "license": "MIT",
   "keywords": [
     "codex",
@@ -21,10 +21,10 @@
       "interface": {
         "displayName": "Our Free Model",
         "shortDescription": "Free frontier models in Codex, with no account and no key.",
-        "longDescription": "Runs a local OpenCode Zen free-lane gateway that speaks the Responses API, and wires Codex to it as a custom model provider. The model roster is pulled from the live lane, so models appear in Codex's own picker. No login, no sign-up, no API key.",
+        "longDescription": "Runs a local OpenCode Zen free-lane gateway that speaks the Responses API, and wires Codex to it as a custom model provider. A sidebar configuration app manages model visibility, API-key provider accounts, connection tests, and gateway setup. The model roster is pulled from the live lane, so models appear in Codex's own picker.",
         "developerName": "Ebony Vinyl",
         "category": "Other",
-        "websiteURL": "https://github.com/Ebony-Vinyl/codex-our-free-model",
+        "websiteURL": "https://github.com/bob97989/codex-our-free-model",
         "capabilities": [
           "model-provider",
           "local-gateway"

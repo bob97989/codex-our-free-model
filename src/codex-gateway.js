@@ -129,15 +129,95 @@ function sendJson(res, status, value) {
   res.end(body)
 }
 
+/** Read one bounded JSON request body from the loopback settings API. */
+async function readJson(req, maxBytes = 1024 * 1024) {
+  const chunks = []
+  let size = 0
+  for await (const chunk of req) {
+    size += chunk.length
+    if (size > maxBytes) {
+      throw Object.assign(new Error('request body is too large'), { statusCode: 413 })
+    }
+    chunks.push(chunk)
+  }
+  const text = Buffer.concat(chunks).toString('utf8')
+  if (text.trim() === '') return {}
+  try {
+    return JSON.parse(text)
+  } catch {
+    throw Object.assign(new Error('request body is not valid JSON'), { statusCode: 400 })
+  }
+}
+
+function errorMessage(error) {
+  return String(error?.message ?? error)
+}
+
+/**
+ * The settings endpoints. Every route is behind the same bearer key as the
+ * model catalog; the sidebar reaches them through the MCP server, not directly
+ * from its sandboxed iframe.
+ */
+async function handlePanelRequest(req, res, path, panel) {
+  if (!path.startsWith('/panel')) return false
+  try {
+    if (req.method === 'GET' && path === '/panel') {
+      sendJson(res, 200, panel.snapshot())
+      return true
+    }
+    if (req.method !== 'POST') {
+      sendJson(res, 405, { error: { message: `no settings route for ${req.method} ${path}` } })
+      return true
+    }
+    const body = await readJson(req)
+    if (path === '/panel/settings') {
+      sendJson(res, 200, { ok: true, snapshot: panel.updateSettings(body) })
+      return true
+    }
+    if (path === '/panel/model') {
+      sendJson(res, 200, { ok: true, snapshot: panel.setModelEnabled(body) })
+      return true
+    }
+    if (path === '/panel/providers/save') {
+      sendJson(res, 200, { ok: true, snapshot: panel.saveProvider(body) })
+      return true
+    }
+    if (path === '/panel/providers/remove') {
+      sendJson(res, 200, { ok: true, snapshot: panel.removeProvider(body?.providerId) })
+      return true
+    }
+    if (path === '/panel/providers/test') {
+      sendJson(res, 200, { ok: true, ...await panel.testProviderAccount(body?.providerId) })
+      return true
+    }
+    if (path === '/panel/providers/discover') {
+      sendJson(res, 200, { ok: true, ...await panel.discoverProviderModels(body?.providerId) })
+      return true
+    }
+    if (path === '/panel/refresh') {
+      sendJson(res, 200, { ok: true, snapshot: await panel.refreshModels() })
+      return true
+    }
+    sendJson(res, 404, { error: { message: `unknown settings route ${path}` } })
+  } catch (error) {
+    const status = Number(error?.statusCode)
+    sendJson(res, Number.isInteger(status) && status >= 400 && status <= 599 ? status : 500, {
+      error: { message: errorMessage(error) },
+    })
+  }
+  return true
+}
+
 /**
  * Start the gateway Codex talks to.
  *
  * @param {object} options
  * @param {object} options.runtime - the model runtime from `src/core/runtime.js`
+ * @param {object} options.panel - settings controller from `src/panel-controller.js`
  * @param {() => {enabled?: boolean, host?: string, port?: number, forwardKey?: string}} options.config
  * @param {(message: string) => void} [options.log]
  */
-export async function startCodexGateway({ runtime, config, log = () => {} }) {
+export async function startCodexGateway({ runtime, panel, config, log = () => {} }) {
   const settings = () => config() ?? {}
   const key = () => {
     const value = settings().forwardKey
@@ -155,6 +235,13 @@ export async function startCodexGateway({ runtime, config, log = () => {} }) {
   const handleRequest = async (req, res) => {
     const url = new URL(req.url ?? '/', 'http://localhost')
     const path = url.pathname.replace(/\/+$/, '') || '/'
+    if (path === '/panel' || path.startsWith('/panel/')) {
+      if (!keyMatches(bearer(req), key())) {
+        sendJson(res, 401, { error: { message: 'missing or invalid API key', type: 'invalid_request_error' } })
+        return true
+      }
+      return handlePanelRequest(req, res, path, panel)
+    }
     const catalogPaths = new Set(['/models/catalog', '/v1/models/catalog'])
     if (!catalogPaths.has(path) && path !== '/v1/models' && path !== '/models') return false
     if (req.method !== 'GET') return false

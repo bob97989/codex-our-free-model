@@ -15,96 +15,28 @@
  */
 
 import fs from 'node:fs'
-import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { startService, resolveDataDir, PRODUCT, VERSION } from '../src/service.js'
+import {
+  BLOCK_BEGIN,
+  CATALOG_PATH,
+  PROVIDER_ID,
+  codexHome,
+  readConfig,
+  renderManagedBlock,
+  stripManagedBlock,
+  upsertManagedBlock,
+  writeConfig,
+} from '../src/codex-config.js'
 
-const PROVIDER_ID = 'our-free-model'
-const CATALOG_PATH = '/models/catalog'
-const BEGIN = '# >>> our-free-model (managed block — edits here are overwritten) >>>'
-const END = '# <<< our-free-model <<<'
-
-function codexHome(env = process.env) {
-  const configured = typeof env.CODEX_HOME === 'string' ? env.CODEX_HOME.trim() : ''
-  return configured !== '' ? path.resolve(configured) : path.join(os.homedir(), '.codex')
-}
+export { renderManagedBlock, stripManagedBlock, upsertManagedBlock }
 
 /**
  * Install the block. Trailing separator comes from the block and the leading
  * one is added only when the file does not already end in a newline, so
  * `stripManagedBlock(upsert(contents))` is exactly `contents`.
  */
-export function upsertManagedBlock(contents, block) {
-  const start = contents.indexOf(BEGIN)
-  if (start !== -1) {
-    const end = contents.indexOf(END, start)
-    if (end !== -1) {
-      const after = end + END.length
-      const rest = contents.slice(after)
-      // Drop the newline immediately after the old block, then let the (also
-      // newline-terminated) replacement supply exactly one.
-      return contents.slice(0, start) + block + (rest.startsWith('\n') ? rest.slice(1) : rest)
-    }
-  }
-  const separator = contents === '' || contents.endsWith('\n') ? '' : '\n'
-  return `${contents}${separator}${contents === '' ? '' : '\n'}${block}`
-}
-
-/** Blank-line separated so the block cannot merge with a neighbouring table. */
-export function renderManagedBlock({ baseUrl, key }) {
-  return `${BEGIN}
-# Written by ${PRODUCT} v${VERSION}. Regenerate with: cofm setup
-#
-# Free models, no account and no key. The gateway runs on this machine and
-# speaks the Responses API, which is the only wire Codex accepts.
-
-[model_providers.${PROVIDER_ID}]
-name = "Our Free Model (free)"
-base_url = "${baseUrl}"
-wire_api = "responses"
-requires_openai_auth = false
-model_catalog_url = "${baseUrl}${CATALOG_PATH}"
-request_max_retries = 2
-stream_max_retries = 2
-stream_idle_timeout_ms = 300000
-
-[model_providers.${PROVIDER_ID}.http_headers]
-Authorization = "Bearer ${key}"
-${END}
-`
-}
-
-/**
- * Remove our block, restoring the document to the byte level it had before
- * `upsertManagedBlock` ran. Absent block is a no-op.
- */
-export function stripManagedBlock(contents) {
-  const start = contents.indexOf(BEGIN)
-  if (start === -1) return contents
-  const end = contents.indexOf(END, start)
-  if (end === -1) return contents
-  return contents.slice(0, start) + contents.slice(end + END.length)
-}
-
-function readConfig(file) {
-  try {
-    return fs.readFileSync(file, 'utf8')
-  } catch (error) {
-    if (error.code === 'ENOENT') return ''
-    throw new Error(`could not read ${file}: ${error.message}`)
-  }
-}
-
-function writeConfig(file, contents) {
-  fs.mkdirSync(path.dirname(file), { recursive: true })
-  // Write through a temporary file so a crash cannot leave a half-written
-  // config.toml behind — Codex refuses to start on one.
-  const temp = `${file}.cofm-${process.pid}.tmp`
-  fs.writeFileSync(temp, contents, { mode: 0o600 })
-  fs.renameSync(temp, file)
-}
-
 /** Probe the gateway the way Codex will, so setup fails loudly, not later. */
 async function verifyGateway({ baseUrl, key }) {
   const health = await fetch(`${baseUrl}/health`, { signal: AbortSignal.timeout(5000) })
@@ -180,7 +112,7 @@ async function cmdDoctor() {
 
   const file = path.join(codexHome(), 'config.toml')
   const contents = readConfig(file)
-  const hasBlock = contents.includes(BEGIN)
+  const hasBlock = contents.includes(BLOCK_BEGIN)
   note(hasBlock, 'config.toml provider block', hasBlock ? `present in ${file}` : `missing — run \`cofm setup\``)
 
   const dataDir = resolveDataDir()
@@ -218,7 +150,7 @@ async function cmdDoctor() {
 function cmdUninstall() {
   const file = path.join(codexHome(), 'config.toml')
   const contents = readConfig(file)
-  if (!contents.includes(BEGIN)) {
+  if (!contents.includes(BLOCK_BEGIN)) {
     process.stdout.write('Nothing to remove; config.toml has no managed block.\n')
     return
   }

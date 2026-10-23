@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Our Free Model</title>
+  <style>
+    :root {
+      --bg: #f5f5f2;
+      --surface: #ffffff;
+      --surface-2: #efefeb;
+      --surface-3: #e7e7e1;
+      --text: #20201d;
+      --muted: #6c6c64;
+      --faint: #99998f;
+      --line: #deded7;
+      --accent: #16785e;
+      --accent-strong: #0e6049;
+      --accent-soft: #dff3eb;
+      --danger: #b43c3c;
+      --danger-soft: #f8e3e2;
+      --warn: #9a6410;
+      --warn-soft: #f8edd6;
+      --shadow: 0 20px 60px rgb(26 26 22 / 8%);
+      --radius: 18px;
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #161714;
+        --surface: #1e201c;
+        --surface-2: #272924;
+        --surface-3: #30332c;
+        --text: #efefe9;
+        --muted: #aaa99f;
+        --faint: #77776e;
+        --line: #393b34;
+        --accent: #65d6b4;
+        --accent-strong: #8be7ca;
+        --accent-soft: #173a30;
+        --danger: #ff8f8b;
+        --danger-soft: #402321;
+        --warn: #f3c56b;
+        --warn-soft: #3d321e;
+        --shadow: 0 20px 60px rgb(0 0 0 / 24%);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; margin: 0; background: var(--bg); color: var(--text); }
+    body { min-width: 320px; }
+    button, input, textarea, select { font: inherit; }
+    button { color: inherit; }
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 232px minmax(0, 1fr);
+    }
+    .rail {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 22px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      border-right: 1px solid var(--line);
+      background: color-mix(in srgb, var(--surface) 82%, var(--bg));
+      backdrop-filter: blur(20px);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px; }
+    .brand-mark {
+      width: 36px; height: 36px; display: grid; place-items: center;
+      border-radius: 12px; background: var(--text); color: var(--bg);
+      font-size: 22px; font-weight: 700; letter-spacing: -2px;
+      box-shadow: var(--shadow);
+    }
+    .brand-copy b { display: block; font-size: 14px; letter-spacing: -.01em; }
+    .brand-copy span { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; }
+    .nav { display: grid; gap: 5px; }
+    .nav button {
+      width: 100%; border: 0; border-radius: 11px; background: transparent;
+      padding: 10px 12px; display: flex; align-items: center; gap: 10px;
+      text-align: left; cursor: pointer; color: var(--muted); font-size: 13px;
+    }
+    .nav button:hover { background: var(--surface-2); color: var(--text); }
+    .nav button[aria-current="page"] { background: var(--surface-3); color: var(--text); font-weight: 600; }
+    .nav-icon { width: 20px; text-align: center; font-size: 15px; }
+    .rail-foot { margin-top: auto; padding: 12px 8px 2px; border-top: 1px solid var(--line); color: var(--faint); font-size: 11px; line-height: 1.55; }
+    .main-wrap { min-width: 0; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; padding: 18px 30px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(18px);
+    }
+    .topbar h1 { margin: 0; font-size: 20px; letter-spacing: -.025em; }
+    .topbar p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .status-pill { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+    .dot.ok { background: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent); }
+    .dot.bad { background: var(--danger); }
+    .main { max-width: 1120px; margin: 0 auto; padding: 28px 30px 56px; }
+    .notice { margin-bottom: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 12px 15px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .notice.error { border-color: color-mix(in srgb, var(--danger) 36%, var(--line)); background: var(--danger-soft); color: var(--danger); }
+    .notice.warn { border-color: color-mix(in srgb, var(--warn) 36%, var(--line)); background: var(--warn-soft); color: var(--warn); }
+    .hero {
+      position: relative; overflow: hidden; padding: 26px;
+      border: 1px solid var(--line); border-radius: 24px;
+      background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--accent-soft) 55%, var(--surface)));
+      box-shadow: var(--shadow);
+    }
+    .hero::after {
+      content: "∞"; position: absolute; right: 26px; bottom: -46px;
+      color: color-mix(in srgb, var(--accent) 15%, transparent);
+      font-size: 190px; font-weight: 800; line-height: 1; pointer-events: none;
+    }
+    .eyebrow { color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .hero h2 { position: relative; z-index: 1; margin: 8px 0 8px; max-width: 680px; font-size: clamp(25px, 4vw, 40px); letter-spacing: -.045em; line-height: 1.08; }
+    .hero p { position: relative; z-index: 1; margin: 0; max-width: 680px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .hero-actions { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 9px; margin-top: 20px; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+    .stat { padding: 15px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+    .stat b { display: block; font-size: 25px; letter-spacing: -.04em; }
+    .stat span { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; }
+    .section { margin-top: 28px; }
+    .section-head { margin-bottom: 12px; display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+    .section-head h3 { margin: 0; font-size: 16px; letter-spacing: -.015em; }
+    .section-head p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+    .card + .card { margin-top: 10px; }
+    .card-pad { padding: 17px; }
+    .list { display: grid; }
+    .row { display: flex; align-items: center; gap: 13px; padding: 13px 16px; border-top: 1px solid var(--line); }
+    .row:first-child { border-top: 0; }
+    .row-main { min-width: 0; flex: 1; }
+    .row-title { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; font-size: 13px; font-weight: 600; }
+    .row-sub { margin-top: 4px; overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+    .tag { display: inline-flex; align-items: center; border-radius: 999px; padding: 2px 7px; background: var(--surface-2); color: var(--muted); font-size: 10px; font-weight: 600; }
+    .tag.free { background: var(--accent-soft); color: var(--accent); }
+    .tag.warn { background: var(--warn-soft); color: var(--warn); }
+    .tag.bad { background: var(--danger-soft); color: var(--danger); }
+    .button {
+      border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+      padding: 8px 12px; cursor: pointer; font-size: 12px; font-weight: 600;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .button:hover:not(:disabled) { transform: translateY(-1px); background: var(--surface-2); }
+    .button.primary { border-color: var(--accent-strong); background: var(--text); color: var(--bg); }
+    .button.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--text) 88%, var(--accent)); }
+    .button.soft { border-color: transparent; background: var(--surface-2); }
+    .button.danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 32%, var(--line)); background: transparent; }
+    .button:disabled { opacity: .45; cursor: not-allowed; }
+    .mini { padding: 6px 9px; font-size: 11px; }
+    .switch {
+      position: relative; flex: 0 0 auto; width: 38px; height: 22px; border: 0;
+      border-radius: 999px; background: var(--surface-3); cursor: pointer; padding: 2px;
+      transition: background .18s ease;
+    }
+    .switch::after {
+      content: ""; display: block; width: 18px; height: 18px; border-radius: 50%;
+      background: var(--surface); box-shadow: 0 1px 4px rgb(0 0 0 / 18%);
+      transition: transform .18s ease;
+    }
+    .switch[aria-checked="true"] { background: var(--accent); }
+    .switch[aria-checked="true"]::after { transform: translateX(16px); }
+    .field { display: grid; gap: 6px; }
+    .field > span { color: var(--muted); font-size: 11px; font-weight: 600; }
+    .input {
+      width: 100%; border: 1px solid var(--line); border-radius: 11px;
+      background: var(--surface); color: var(--text); padding: 10px 12px; outline: none;
+      font-size: 13px;
+    }
+    .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent); }
+    textarea.input { resize: vertical; min-height: 74px; }
+    .search { min-width: min(300px, 100%); }
+    .muted { color: var(--muted); }
+    .empty { padding: 34px 18px; text-align: center; color: var(--muted); font-size: 13px; }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .setting-card { padding: 17px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+    .setting-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .setting-top b { display: block; font-size: 13px; }
+    .setting-top p { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .account-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .account { padding: 16px; }
+    .account-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .account-name { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
+    .account-meta { margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .account-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 13px; }
+    .account .row-sub { white-space: normal; }
+    .modal-backdrop {
+      position: fixed; inset: 0; z-index: 30; display: grid; place-items: center;
+      padding: 22px; background: rgb(0 0 0 / 38%); backdrop-filter: blur(6px);
+    }
+    .modal {
+      width: min(820px, 100%); max-height: min(88vh, 900px); overflow: auto;
+      border: 1px solid var(--line); border-radius: 24px; background: var(--surface);
+      box-shadow: 0 30px 100px rgb(0 0 0 / 32%);
+    }
+    .modal-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 19px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(16px); }
+    .modal-head b { font-size: 15px; }
+    .modal-body { padding: 19px; }
+    .provider-picks { display: grid; gap: 7px; max-height: 360px; overflow: auto; margin-top: 12px; }
+    .provider-pick { border: 1px solid var(--line); border-radius: 13px; background: var(--surface); padding: 11px 12px; text-align: left; cursor: pointer; }
+    .provider-pick:hover:not(:disabled) { background: var(--surface-2); }
+    .provider-pick:disabled { opacity: .45; cursor: not-allowed; }
+    .provider-pick b { display: block; font-size: 12px; }
+    .provider-pick span { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+    .modal-form { display: grid; gap: 14px; }
+    .modal-form .split { align-items: start; }
+    .modal-foot { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; padding-top: 3px; }
+    .loading { min-height: 70vh; display: grid; place-items: center; color: var(--muted); font-size: 13px; }
+    .spinner { width: 24px; height: 24px; margin: 0 auto 12px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .busy-veil { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: color-mix(in srgb, var(--bg) 55%, transparent); backdrop-filter: blur(2px); }
+    .busy-card { border: 1px solid var(--line); border-radius: 15px; background: var(--surface); padding: 15px 20px; box-shadow: var(--shadow); font-size: 12px; }
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      .rail { position: static; height: auto; padding: 14px 16px 12px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .rail-foot { display: none; }
+      .nav { display: flex; overflow: auto; }
+      .nav button { width: auto; flex: 0 0 auto; }
+      .topbar, .main { padding-left: 18px; padding-right: 18px; }
+      .stats, .settings-grid, .account-grid, .split { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 560px) {
+      .stats, .settings-grid, .account-grid, .split { grid-template-columns: 1fr; }
+      .hero { padding: 20px; }
+      .hero h2 { font-size: 27px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .row { align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app">
+    <div class="loading"><div><div class="spinner"></div>正在连接 Our Free Model…</div></div>
+  </div>
+  <script>
+    const app = document.getElementById('app')
+    const state = {
+      snapshot: null,
+      tab: 'overview',
+      search: '',
+      providerQuery: '',
+      selectedProvider: '',
+      modal: '',
+      notice: '',
+      error: '',
+      busy: '',
+      discovery: null,
+      confirmRemove: '',
+    }
+
+    const esc = value => String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;')
+
+    const fmtNumber = value => {
+      const number = Number(value)
+      if (!Number.isFinite(number) || number <= 0) return ''
+      if (number >= 1_000_000) return (number / 1_000_000).toFixed(number >= 10_000_000 ? 0 : 1).replace('.0', '') + 'M'
+      if (number >= 1_000) return Math.round(number / 1_000) + 'K'
+      return String(Math.round(number))
+    }
+
+    const channelName = row => row.channel === 'free'
+      ? '免费池'
+      : row.channel === 'combo' ? '组合' : (row.providerId || '外部账号')
+    const isConfigured = () => state.snapshot?.gateway?.running === true
+
+    const bridge = (() => {
+      let sequence = 1
+      let connected = false
+      let connecting = null
+      const pending = new Map()
+
+      window.addEventListener('message', event => {
+        if (event.source !== window.parent) return
+        const data = event.data
+        if (!data || data.jsonrpc !== '2.0') return
+        if (data.id !== undefined && pending.has(data.id)) {
+          const waiter = pending.get(data.id)
+          pending.delete(data.id)
+          if (data.error) waiter.reject(new Error(data.error.message || 'Host request failed'))
+          else waiter.resolve(data.result)
+        }
+        if (data.method === 'ping' && data.id !== undefined) {
+          window.parent.postMessage({ jsonrpc: '2.0', id: data.id, result: {} }, '*')
+        }
+        if (data.method === 'ui/resource-teardown' && data.id !== undefined) {
+          window.parent.postMessage({ jsonrpc: '2.0', id: data.id, result: {} }, '*')
+        }
+      })
+
+      const request = (method, params) => new Promise((resolve, reject) => {
+        const id = sequence++
+        const timer = setTimeout(() => {
+          pending.delete(id)
+          reject(new Error('宿主没有响应，请关闭面板后重新打开。'))
+        }, 180000)
+        pending.set(id, {
+          resolve: value => { clearTimeout(timer); resolve(value) },
+          reject: error => { clearTimeout(timer); reject(error) },
+        })
+        window.parent.postMessage({ jsonrpc: '2.0', id, method, params }, '*')
+      })
+
+      const post = (method, params) => {
+        window.parent.postMessage({ jsonrpc: '2.0', method, params }, '*')
+      }
+
+      const init = () => {
+        if (connected) return Promise.resolve()
+        if (connecting) return connecting
+        connecting = (async () => {
+          if (window.openai?.callTool) {
+            connected = true
+            return
+          }
+          if (window.parent === window) throw new Error('请从 Codex 左侧边栏打开此面板。')
+          await request('ui/initialize', {
+            appInfo: { name: 'codex-our-free-model', version: '1.1.0' },
+            appCapabilities: { tools: {} },
+            protocolVersion: '2026-01-26',
+          })
+          post('ui/notifications/initialized', {})
+          connected = true
+        })()
+        return connecting
+      }
+
+      const unwrap = result => {
+        if (result?.structuredContent !== undefined) return result.structuredContent
+        if (result?.result?.structuredContent !== undefined) return result.result.structuredContent
+        if (result?.result !== undefined && result.content === undefined) return result.result
+        return result
+      }
+
+      return {
+        async call(name, args = {}) {
+          await init()
+          if (window.openai?.callTool) return unwrap(await window.openai.callTool(name, args))
+          const result = await request('tools/call', { name, arguments: args })
+          if (result?.isError) {
+            const message = result.content?.find?.(item => item?.type === 'text')?.text
+            throw new Error(message || '工具调用失败')
+          }
+          return unwrap(result)
+        },
+      }
+    })()
+
+    function setSnapshot(snapshot) {
+      if (snapshot && typeof snapshot === 'object') state.snapshot = snapshot
+    }
+
+    async function run(label, action) {
+      if (state.busy) return
+      state.busy = label
+      state.error = ''
+      render()
+      try {
+        await action()
+      } catch (error) {
+        state.error = String(error?.message ?? error)
+      } finally {
+        state.busy = ''
+        render()
+      }
+    }
+
+    async function refreshSnapshot() {
+      const snapshot = await bridge.call('panel_snapshot')
+      setSnapshot(snapshot)
+    }
+
+    async function refreshModels() {
+      await run('正在刷新模型…', async () => {
+        const result = await bridge.call('panel_refresh')
+        setSnapshot(result.snapshot)
+        state.notice = '模型清单已刷新。Codex 的模型选择器可能需要重新打开或重启当前应用才会更新。'
+      })
+    }
+
+    async function startGateway() {
+      await run('正在启动本地网关…', async () => {
+        const result = await bridge.call('start_gateway')
+        setSnapshot(result.snapshot)
+        state.notice = result.configPath
+          ? `网关已启动，并已写入 ${result.configPath}`
+          : '网关已启动。'
+      })
+    }
+
+    async function updateSettings(patch) {
+      await run('正在保存设置…', async () => {
+        const result = await bridge.call('panel_update_settings', { settings: patch })
+        setSnapshot(result.snapshot)
+        state.notice = '设置已保存。'
+      })
+    }
+
+    async function toggleModel(row) {
+      await run(row.enabled ? '正在停用模型…' : '正在启用模型…', async () => {
+        const result = await bridge.call('panel_set_model', { modelId: row.id, enabled: !row.enabled })
+        setSnapshot(result.snapshot)
+        state.notice = `${row.name} 已${row.enabled ? '从选择器隐藏' : '加入选择器'}。`
+      })
+    }
+
+    async function toggleAccount(account) {
+      await run('正在更新账号…', async () => {
+        const result = await bridge.call('panel_save_provider', {
+          providerId: account.providerId,
+          enabled: !account.enabled,
+        })
+        setSnapshot(result.snapshot)
+      })
+    }
+
+    async function testAccount(account) {
+      await run('正在测试账号…', async () => {
+        const result = await bridge.call('panel_test_provider', { providerId: account.providerId })
+        setSnapshot(result.snapshot)
+        state.notice = result.result?.message || (result.result?.ok ? '连接成功。' : '连接测试未通过。')
+      })
+    }
+
+    async function discoverAccount(account) {
+      await run('正在读取模型列表…', async () => {
+        const result = await bridge.call('panel_discover_provider', { providerId: account.providerId })
+        setSnapshot(result.snapshot)
+        state.discovery = { providerId: account.providerId, models: result.models || [] }
+        state.notice = result.models === null ? '这个提供商没有公开的模型列表接口。' : `发现 ${result.models.length} 个模型。`
+      })
+    }
+
+    async function saveAccount() {
+      const providerId = state.selectedProvider
+      const provider = state.snapshot.registry.find(item => item.id === providerId)
+      if (!provider) return
+      const form = document.getElementById('provider-form')
+      const apiKey = form.querySelector('[name="apiKey"]').value
+      const baseUrl = form.querySelector('[name="baseUrl"]').value
+      const enabled = form.querySelector('[name="enabled"]').checked
+      const models = form.querySelector('[name="models"]').value
+        .split(/[\n,]+/).map(value => value.trim()).filter(Boolean)
+      const body = { providerId, enabled, baseUrl, models }
+      if (apiKey !== '') body.apiKey = apiKey
+      await run('正在保存账号…', async () => {
+        const result = await bridge.call('panel_save_provider', body)
+        setSnapshot(result.snapshot)
+        state.modal = ''
+        state.selectedProvider = ''
+        state.notice = `${provider.name} 账号已保存。`
+      })
+    }
+
+    async function clearKey() {
+      const providerId = state.selectedProvider
+      if (!providerId) return
+      await run('正在清除密钥…', async () => {
+        const result = await bridge.call('panel_save_provider', { providerId, apiKey: '' })
+        setSnapshot(result.snapshot)
+        state.notice = '已清除保存的 API Key。'
+      })
+    }
+
+    async function removeAccount(account) {
+      if (state.confirmRemove !== account.providerId) {
+        state.confirmRemove = account.providerId
+        render()
+        return
+      }
+      await run('正在移除账号…', async () => {
+        const result = await bridge.call('panel_remove_provider', { providerId: account.providerId })
+        setSnapshot(result.snapshot)
+        state.confirmRemove = ''
+        state.modal = ''
+        state.selectedProvider = ''
+        state.notice = `${account.name} 已移除。`
+      })
+    }
+
+    function modalProviderView() {
+      const existing = state.snapshot.accounts.find(item => item.providerId === state.selectedProvider)
+      const provider = state.snapshot.registry.find(item => item.id === state.selectedProvider)
+      if (!provider) return ''
+      const discovery = state.discovery?.providerId === provider.id ? state.discovery.models : null
+      return `
+        <div class="modal-backdrop">
+          <section class="modal" role="dialog" aria-modal="true" aria-label="配置账号" data-stop="1">
+            <header class="modal-head">
+              <div><b>${esc(provider.name)}</b><div class="muted" style="font-size:11px;margin-top:3px">${esc(provider.id)} · ${esc(provider.format)}</div></div>
+              <button class="button mini" data-action="close-modal">关闭</button>
+            </header>
+            <div class="modal-body">
+              <form id="provider-form" class="modal-form" onsubmit="return false">
+                <div class="setting-top">
+                  <div><b>启用此账号</b><p>关闭后该账号的模型会立即从 Codex 模型选择器消失，但密钥和设置会保留。</p></div>
+                  <input type="checkbox" name="enabled" ${existing?.enabled === false ? '' : 'checked'} aria-label="启用此账号">
+                </div>
+                <div class="split">
+                  <label class="field"><span>API Key ${existing?.hasKey ? `（已保存 ${esc(existing.keyHint)}，留空表示保持不变）` : ''}</span>
+                    <input class="input" name="apiKey" type="password" autocomplete="off" placeholder="${existing?.hasKey ? '留空以保留现有密钥' : '粘贴提供商 API Key'}">
+                  </label>
+                  <label class="field"><span>Base URL（可选）</span>
+                    <input class="input" name="baseUrl" value="${esc(existing?.baseUrl || '')}" placeholder="${esc(provider.baseUrl || '该提供商需要自定义端点')}">
+                  </label>
+                </div>
+                <label class="field"><span>模型 ID（每行一个，留空使用注册表默认模型）</span>
+                  <textarea class="input" name="models" rows="6" placeholder="${esc(provider.models.map(model => model.id).join('\n'))}">${esc((existing?.models || []).join('\n'))}</textarea>
+                </label>
+                ${discovery === null ? '' : `<div class="notice ${discovery.length === 0 ? 'warn' : ''}">发现 ${discovery.length} 个模型。${discovery.length ? `<button class="button mini" data-action="use-discovered">填入发现结果</button>` : '该账号没有返回可用的模型。'}</div>`}
+                ${provider.notes ? `<div class="notice">${esc(provider.notes)}</div>` : ''}
+                <div class="modal-foot">
+                  ${existing?.hasKey ? '<button type="button" class="button danger mini" data-action="clear-key">清除 API Key</button>' : ''}
+                  ${existing ? `<button type="button" class="button danger mini" data-action="remove-account" data-provider="${esc(existing.providerId)}">${state.confirmRemove === existing.providerId ? '再次点击确认移除' : '移除账号'}</button>` : ''}
+                  <span style="flex:1"></span>
+                  <button type="button" class="button" data-action="close-modal">取消</button>
+                  <button type="button" class="button primary" data-action="save-account">${existing ? '保存更改' : '添加账号'}</button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>`
+    }
+
+    function providerPickerView() {
+      const query = state.providerQuery.trim().toLowerCase()
+      const providers = state.snapshot.registry
+        .filter(provider => !query || `${provider.name} ${provider.id} ${provider.notes}`.toLowerCase().includes(query))
+        .slice(0, 80)
+      return `
+        <div class="modal-backdrop">
+          <section class="modal" role="dialog" aria-modal="true" aria-label="添加账号" data-stop="1">
+            <header class="modal-head">
+              <div><b>添加账号</b><div class="muted" style="font-size:11px;margin-top:3px">从项目内置的提供商注册表选择一个 API Key 账号</div></div>
+              <button class="button mini" data-action="close-modal">关闭</button>
+            </header>
+            <div class="modal-body">
+              <label class="field"><span>搜索提供商</span>
+                <input id="provider-search" class="input" value="${esc(state.providerQuery)}" placeholder="OpenAI、Anthropic、DeepSeek、NVIDIA…">
+              </label>
+              <div class="provider-picks">
+                ${providers.length === 0 ? '<div class="empty">没有匹配的提供商。</div>' : providers.map(provider => {
+                  const blocked = provider.authKind === 'oauth' || provider.authKind === 'adc'
+                  return `<button class="provider-pick" data-action="pick-provider" data-provider="${esc(provider.id)}" ${blocked ? 'disabled' : ''}>
+                    <b>${esc(provider.name)}</b>
+                    <span>${esc(provider.category)} · ${esc(provider.format)} · ${esc(provider.authKind)} · ${provider.modelCount} 个内置模型${blocked ? ' · 此渠道不支持用户名/密码登录' : ''}</span>
+                  </button>`
+                }).join('')}
+              </div>
+            </div>
+          </section>
+        </div>`
+    }
+
+    function overviewPage() {
+      const data = state.snapshot
+      const gateway = data.gateway
+      const freeEnabled = !data.settings.hideFreeModels
+      const aggregateEnabled = data.settings.aggregate.enabled
+      return `
+        <section class="hero">
+          <div class="eyebrow">Codex Plugin · Local Gateway</div>
+          <h2>免费模型和你的账号，都从一个侧栏管理。</h2>
+          <p>内置免费池无需登录。添加自己的 API Key 账号后，也可以把对应模型加入 Codex 模型选择器。关闭单个模型只会隐藏它，不会删除配置。</p>
+          <div class="hero-actions">
+            ${gateway.running
+              ? '<button class="button soft" data-action="refresh-models">刷新模型清单</button>'
+              : '<button class="button primary" data-action="start-gateway">启动并配置网关</button>'}
+            <button class="button" data-action="go-accounts">管理账号</button>
+          </div>
+        </section>
+        <section class="stats">
+          <div class="stat"><b>${data.counts.enabledModels}</b><span>已启用模型</span></div>
+          <div class="stat"><b>${data.counts.freeModels}</b><span>免费池模型</span></div>
+          <div class="stat"><b>${data.counts.aggregateModels}</b><span>账号模型</span></div>
+          <div class="stat"><b>${data.counts.accounts}</b><span>已配置账号</span></div>
+        </section>
+        <section class="section">
+          <div class="section-head"><div><h3>运行状态</h3><p>网关只监听本机，并由插件自己的密钥保护。</p></div></div>
+          <div class="settings-grid">
+            <div class="setting-card">
+              <div class="setting-top">
+                <div><b>本地网关</b><p>${gateway.running ? esc(gateway.url) : '尚未运行。启动后会自动写入 Codex 的 provider 配置。'}</p></div>
+                <span class="status-pill tag ${gateway.running ? 'free' : 'warn'}"><span class="dot ${gateway.running ? 'ok' : ''}"></span>${gateway.running ? '运行中' : '未运行'}</span>
+              </div>
+            </div>
+            <div class="setting-card">
+              <div class="setting-top">
+                <div><b>推理总开关</b><p>关闭后网关仍可查看配置，但模型请求会被拒绝。</p></div>
+                <button class="switch" aria-label="推理总开关" aria-checked="${data.settings.enabled}" data-action="toggle-setting" data-key="enabled" data-value="${data.settings.enabled}"></button>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="section">
+          <div class="section-head"><div><h3>模型车道</h3><p>两个开关分别控制免费池和所有外部账号。</p></div></div>
+          <div class="list card">
+            <div class="row">
+              <div class="row-main"><div class="row-title">内置免费池 <span class="tag free">免登录</span></div><div class="row-sub">OpenCode Zen 公共免费车道，按出口 IP 共享额度。</div></div>
+              <button class="switch" aria-label="启用免费池" aria-checked="${freeEnabled}" data-action="toggle-setting" data-key="hideFreeModels" data-invert="1" data-value="${!freeEnabled}"></button>
+            </div>
+            <div class="row">
+              <div class="row-main"><div class="row-title">外部账号模型 <span class="tag">${data.counts.accounts} 个账号</span></div><div class="row-sub">来自你添加的 API Key 提供商。</div></div>
+              <button class="switch" aria-label="启用外部账号模型" aria-checked="${aggregateEnabled}" data-action="toggle-aggregate"></button>
+            </div>
+          </div>
+        </section>`
+    }
+
+    function modelsPage() {
+      const query = state.search.trim().toLowerCase()
+      const models = state.snapshot.models.filter(model => !query || `${model.name} ${model.id} ${channelName(model)}`.toLowerCase().includes(query))
+      return `
+        <section class="section" style="margin-top:0">
+          <div class="section-head">
+            <div><h3>模型开关</h3><p>${state.snapshot.counts.enabledModels}/${state.snapshot.counts.models} 个模型会出现在 Codex 选择器。</p></div>
+            <div class="toolbar">
+              <button class="button mini" data-action="set-free-group" data-enable="${state.snapshot.settings.hideFreeModels}">${state.snapshot.settings.hideFreeModels ? '启用全部免费模型' : '停用全部免费模型'}</button>
+              <button class="button mini" data-action="set-aggregate-group" data-enable="${!state.snapshot.settings.aggregate.enabled}">${state.snapshot.settings.aggregate.enabled ? '停用账号模型' : '启用账号模型'}</button>
+            </div>
+          </div>
+          <div class="toolbar" style="margin-bottom:12px">
+            <input id="model-search" class="input search" value="${esc(state.search)}" placeholder="搜索模型、提供商或模型 ID">
+            <button class="button mini" data-action="refresh-models">刷新</button>
+          </div>
+          <div class="card list">
+            ${models.length === 0 ? `<div class="empty">${isConfigured() ? '没有匹配的模型。' : '启动网关后会读取当前模型清单。'}</div>` : models.map(model => `
+              <div class="row">
+                <div class="row-main">
+                  <div class="row-title">${esc(model.name)} <span class="tag ${model.channel === 'free' ? 'free' : ''}">${esc(channelName(model))}</span>${model.route === 'region' ? '<span class="tag warn">地区限制</span>' : ''}</div>
+                  <div class="row-sub">${esc(model.id)}${model.contextWindow ? ` · ${fmtNumber(model.contextWindow)} context` : ''}${model.vision ? ' · 图片输入' : ''}${model.hiddenByGroup ? ' · 所属车道已关闭' : ''}</div>
+                </div>
+                <button class="switch" aria-label="启用 ${esc(model.name)}" aria-checked="${model.enabled && !model.hiddenByGroup}" data-action="toggle-model" data-id="${esc(model.id)}" ${model.hiddenByGroup ? 'disabled' : ''}></button>
+              </div>`).join('')}
+          </div>
+        </section>`
+    }
+
+    function accountsPage() {
+      const accounts = state.snapshot.accounts
+      return `
+        <section class="section" style="margin-top:0">
+          <div class="section-head">
+            <div><h3>账号</h3><p>每个提供商可保存一个 API Key 账号；密钥留在本机，界面只显示末四位。</p></div>
+            <button class="button primary" data-action="add-account">添加账号</button>
+          </div>
+          <div class="account-grid">
+            <article class="card account">
+              <div class="account-head">
+                <div>
+                  <div class="account-name">内置免费池</div>
+                  <div class="account-meta">OpenCode Zen · 免登录、免 API Key<br>按出口 IP 共享免费额度</div>
+                </div>
+                <button class="switch" aria-label="启用内置免费池" aria-checked="${!state.snapshot.settings.hideFreeModels}" data-action="toggle-setting" data-key="hideFreeModels" data-value="${!state.snapshot.settings.hideFreeModels}"></button>
+              </div>
+              <div class="account-meta">${state.snapshot.counts.freeModels} 个免费模型正在提供</div>
+              <div class="account-actions">
+                <button class="button mini" data-action="tab" data-tab="models">管理模型</button>
+              </div>
+            </article>
+              ${accounts.map(account => `
+                <article class="card account">
+                  <div class="account-head">
+                    <div>
+                      <div class="account-name">${esc(account.name)}</div>
+                      <div class="account-meta">${esc(account.providerId)} · ${esc(account.format || account.category)}<br>${account.hasKey ? `API Key ${esc(account.keyHint)}` : (account.category === 'free' || account.category === 'local' ? '无需 API Key' : '尚未填写 API Key')}</div>
+                    </div>
+                    <button class="switch" aria-label="启用 ${esc(account.name)}" aria-checked="${account.enabled}" data-action="toggle-account" data-provider="${esc(account.providerId)}"></button>
+                  </div>
+                  <div class="account-meta">${account.contributedModels} 个模型正在提供 · ${account.lastTest ? (account.lastTest.ok ? '上次测试通过' : '上次测试未通过') : '尚未测试'}</div>
+                  <div class="account-actions">
+                    <button class="button mini" data-action="edit-account" data-provider="${esc(account.providerId)}">配置</button>
+                    <button class="button mini" data-action="test-account" data-provider="${esc(account.providerId)}">测试</button>
+                    <button class="button mini" data-action="discover-account" data-provider="${esc(account.providerId)}">发现模型</button>
+                  </div>
+                </article>`).join('')}
+          </div>
+          ${accounts.length === 0 ? `<div class="notice" style="margin-top:12px">还没有外部 API Key 账号。 <button class="button mini" data-action="add-account">添加第一个账号</button></div>` : ''}
+        </section>`
+    }
+
+    function settingsPage() {
+      const data = state.snapshot
+      return `
+        <section class="section" style="margin-top:0">
+          <div class="section-head"><div><h3>插件设置</h3><p>这些设置保存在本机，不会进入对话，也不会上传。</p></div></div>
+          <div class="settings-grid">
+            <div class="setting-card">
+              <div class="setting-top"><div><b>推理总开关</b><p>暂停所有模型调用，保留配置。</p></div>
+                <button class="switch" aria-label="推理总开关" aria-checked="${data.settings.enabled}" data-action="toggle-setting" data-key="enabled" data-value="${data.settings.enabled}"></button></div>
+            </div>
+            <div class="setting-card">
+              <div class="setting-top"><div><b>显示地区限制模型</b><p>上游拒绝某个网络出口时仍保留在清单中，便于换网络后重试。</p></div>
+                <button class="switch" aria-label="显示地区限制模型" aria-checked="${data.settings.exposeRegionModels}" data-action="toggle-setting" data-key="exposeRegionModels" data-value="${data.settings.exposeRegionModels}"></button></div>
+            </div>
+            <div class="setting-card">
+              <div class="setting-top"><div><b>免费池</b><p>关闭后只保留外部账号模型。</p></div>
+                <button class="switch" aria-label="启用免费池" aria-checked="${!data.settings.hideFreeModels}" data-action="toggle-setting" data-key="hideFreeModels" data-invert="1" data-value="${!data.settings.hideFreeModels}"></button></div>
+            </div>
+            <div class="setting-card">
+              <div class="setting-top"><div><b>外部账号模型</b><p>关闭后所有 aggregate 账号模型暂时隐藏。</p></div>
+                <button class="switch" aria-label="启用外部账号模型" aria-checked="${data.settings.aggregate.enabled}" data-action="toggle-aggregate"></button></div>
+            </div>
+          </div>
+          <div class="card card-pad" style="margin-top:12px">
+            <div class="setting-top">
+              <div><b>本地网关</b><p>${data.gateway.running ? `运行于 ${esc(data.gateway.url)} · v${esc(data.version)}` : '未运行。启动后会写入 Codex 的 provider 块。'}</p></div>
+              <button class="button ${data.gateway.running ? '' : 'primary'}" data-action="start-gateway">${data.gateway.running ? '检查并修复配置' : '启动并配置'}</button>
+            </div>
+          </div>
+          <div class="card card-pad" style="margin-top:10px">
+            <div class="setting-top">
+              <div><b>模型清单</b><p>Codex 从本机目录接口读取模型。修改开关后，如果选择器没有立即变化，请重新打开模型选择器。</p></div>
+              <button class="button" data-action="refresh-models" ${data.gateway.running ? '' : 'disabled'}>刷新模型</button>
+            </div>
+          </div>
+        </section>`
+    }
+
+    function render() {
+      if (state.snapshot === null) return
+      const data = state.snapshot
+      const running = data.gateway.running
+      const pages = {
+        overview: ['总览', '免费池与网关状态', overviewPage],
+        models: ['模型', '启用或隐藏模型', modelsPage],
+        accounts: ['账号', 'API Key 提供商', accountsPage],
+        settings: ['设置', '网关与插件选项', settingsPage],
+      }
+      const [, subtitle, page] = pages[state.tab] || pages.overview
+      app.innerHTML = `
+        <aside class="rail">
+          <div class="brand">
+            <div class="brand-mark">∞</div>
+            <div class="brand-copy"><b>Our Free Model</b><span>Codex 插件配置</span></div>
+          </div>
+          <nav class="nav" aria-label="插件配置">
+            ${Object.entries(pages).map(([id, value]) => `<button data-action="tab" data-tab="${id}" aria-current="${state.tab === id ? 'page' : 'false'}"><span class="nav-icon">${id === 'overview' ? '◎' : id === 'models' ? '◇' : id === 'accounts' ? '●' : '⚙'}</span>${value[0]}</button>`).join('')}
+          </nav>
+          <div class="rail-foot">v${esc(data.version)}<br>${running ? '本地网关在线' : '网关未启动'}<br>配置仅保存在本机</div>
+        </aside>
+        <div class="main-wrap">
+          <header class="topbar">
+            <div><h1>${pages[state.tab]?.[0] || '总览'}</h1><p>${esc(subtitle)}</p></div>
+            <span class="status-pill tag ${running ? 'free' : 'warn'}"><span class="dot ${running ? 'ok' : running ? '' : 'bad'}"></span>${running ? '网关在线' : '等待启动'}</span>
+          </header>
+          <main class="main">
+            ${state.error ? `<div class="notice error">${esc(state.error)}</div>` : ''}
+            ${state.notice ? `<div class="notice">${esc(state.notice)}</div>` : ''}
+            ${!running && state.tab !== 'overview' ? `<div class="notice warn">网关尚未运行。配置仍可查看；启动后保存和测试功能才会生效。 <button class="button mini" data-action="start-gateway">启动并配置</button></div>` : ''}
+            ${page()}
+          </main>
+        </div>
+        ${state.modal === 'picker' ? providerPickerView() : ''}
+        ${state.modal === 'provider' ? modalProviderView() : ''}
+        ${state.busy ? `<div class="busy-veil"><div class="busy-card"><div class="spinner"></div>${esc(state.busy)}</div></div>` : ''}
+      `
+    }
+
+    document.addEventListener('click', event => {
+      if (event.target.classList?.contains('modal-backdrop')) {
+        state.modal = ''
+        state.selectedProvider = ''
+        state.discovery = null
+        state.confirmRemove = ''
+        render()
+        return
+      }
+      const target = event.target.closest('[data-action]')
+      if (!target) return
+      const action = target.dataset.action
+      if (action === 'tab') {
+        state.tab = target.dataset.tab
+        state.notice = ''
+        state.error = ''
+        render()
+        return
+      }
+      if (action === 'close-modal') {
+        state.modal = ''
+        state.selectedProvider = ''
+        state.discovery = null
+        state.confirmRemove = ''
+        render()
+        return
+      }
+      if (action === 'go-accounts') {
+        state.tab = 'accounts'
+        render()
+        return
+      }
+      if (action === 'refresh-models') return void refreshModels()
+      if (action === 'start-gateway') return void startGateway()
+      if (action === 'add-account') {
+        state.modal = 'picker'
+        state.providerQuery = ''
+        render()
+        return
+      }
+      if (action === 'pick-provider') {
+        state.selectedProvider = target.dataset.provider
+        state.modal = 'provider'
+        state.discovery = null
+        state.confirmRemove = ''
+        render()
+        return
+      }
+      if (action === 'edit-account') {
+        state.selectedProvider = target.dataset.provider
+        state.modal = 'provider'
+        state.discovery = null
+        state.confirmRemove = ''
+        render()
+        return
+      }
+      if (action === 'toggle-setting') {
+        const current = target.dataset.value === 'true'
+        const key = target.dataset.key
+        return void updateSettings(key === 'hideFreeModels'
+          ? { hideFreeModels: current }
+          : { [key]: !current })
+      }
+      if (action === 'toggle-aggregate') {
+        return void updateSettings({ aggregate: { enabled: !state.snapshot.settings.aggregate.enabled } })
+      }
+      if (action === 'set-free-group') {
+        return void updateSettings({ hideFreeModels: target.dataset.enable !== 'true' })
+      }
+      if (action === 'set-aggregate-group') {
+        return void updateSettings({ aggregate: { enabled: target.dataset.enable === 'true' } })
+      }
+      if (action === 'toggle-model') {
+        const model = state.snapshot.models.find(row => row.id === target.dataset.id)
+        if (model) void toggleModel(model)
+        return
+      }
+      if (action === 'toggle-account') {
+        const account = state.snapshot.accounts.find(row => row.providerId === target.dataset.provider)
+        if (account) void toggleAccount(account)
+        return
+      }
+      if (action === 'test-account') {
+        const account = state.snapshot.accounts.find(row => row.providerId === target.dataset.provider)
+        if (account) void testAccount(account)
+        return
+      }
+      if (action === 'discover-account') {
+        const account = state.snapshot.accounts.find(row => row.providerId === target.dataset.provider)
+        if (account) void discoverAccount(account)
+        return
+      }
+      if (action === 'save-account') return void saveAccount()
+      if (action === 'clear-key') return void clearKey()
+      if (action === 'remove-account') {
+        const account = state.snapshot.accounts.find(row => row.providerId === target.dataset.provider)
+        if (account) void removeAccount(account)
+        return
+      }
+      if (action === 'use-discovered') {
+        const textarea = document.querySelector('#provider-form [name="models"]')
+        if (textarea && state.discovery) textarea.value = state.discovery.models.join('\n')
+      }
+    })
+
+    document.addEventListener('input', event => {
+      if (event.target.id === 'model-search') {
+        state.search = event.target.value
+        const position = event.target.selectionStart
+        render()
+        const next = document.getElementById('model-search')
+        next?.focus()
+        next?.setSelectionRange(position, position)
+      }
+      if (event.target.id === 'provider-search') {
+        state.providerQuery = event.target.value
+        const position = event.target.selectionStart
+        render()
+        const next = document.getElementById('provider-search')
+        next?.focus()
+        next?.setSelectionRange(position, position)
+      }
+    })
+
+    ;(async () => {
+      try {
+        await refreshSnapshot()
+        if (!state.snapshot?.gateway?.running) {
+          state.notice = '网关还没启动。点击“启动并配置网关”即可在左侧边栏完成首次安装。'
+        }
+        render()
+      } catch (error) {
+        app.innerHTML = `<div class="loading"><div><b>无法打开配置面板</b><div class="muted" style="margin-top:8px">${esc(error?.message ?? error)}</div></div></div>`
+      }
+    })()
+  </script>
+</body>
+</html>
