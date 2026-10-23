@@ -23,7 +23,7 @@ import { createPanelController } from './panel-controller.js'
 import { DATA_DIR_NAME } from './store.js'
 
 export const PRODUCT = 'codex-our-free-model'
-export const VERSION = '1.1.1'
+export const VERSION = '1.1.2'
 
 /**
  * Where this service keeps its state.

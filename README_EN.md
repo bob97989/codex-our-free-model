@@ -33,7 +33,7 @@ codex plugin add codex-our-free-model@codex-our-free-model
 
 # 2. Start the gateway and wire Codex to it
 #    (the plugin is already on disk — run its CLI directly)
-node ~/.codex/plugins/cache/codex-our-free-model/codex-our-free-model/1.1.1/bin/cli.mjs setup
+node ~/.codex/plugins/cache/codex-our-free-model/codex-our-free-model/1.1.2/bin/cli.mjs setup
 
 # 3. Start a session on a free model
 codex -m mimo-v2.6-flash-free -c model_provider=our-free-model

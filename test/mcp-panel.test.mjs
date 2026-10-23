@@ -12,7 +12,10 @@ const serverPath = path.join(root, 'bin', 'mcp-server.mjs')
 test('portable MCP config declares its schema', () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'mcp.json'), 'utf8'))
   assert.equal(manifest.$schema, 'https://agent-plugins.org/schemas/1.0.0/mcp.schema.json')
-  assert.ok(manifest.mcpServers['our-free-model'])
+  const server = manifest.mcpServers['our-free-model']
+  assert.ok(server)
+  assert.equal(server.type, 'stdio')
+  assert.deepEqual(Object.keys(server).sort(), ['args', 'command', 'env', 'type'])
 })
 
 function startServer(env) {

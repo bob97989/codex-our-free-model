@@ -33,7 +33,7 @@ codex plugin add codex-our-free-model@codex-our-free-model
 
 # 2. 启动网关并写入 Codex 配置
 #    （插件已装到本地，直接用插件里的 CLI）
-node ~/.codex/plugins/cache/codex-our-free-model/codex-our-free-model/1.1.1/bin/cli.mjs setup
+node ~/.codex/plugins/cache/codex-our-free-model/codex-our-free-model/1.1.2/bin/cli.mjs setup
 
 # 3. 用免费模型开一个会话
 codex -m mimo-v2.6-flash-free -c model_provider=our-free-model
